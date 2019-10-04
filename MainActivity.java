@@ -69,6 +69,35 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+   /* 
+    The function everytime the activity is started
+   */
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        if (!IsEmailVerified()) {
+            showEmailVerificationPopUp = new Intent(Mainpage.this, emailverificationpopup.class);
+            startActivity(showEmailVerificationPopUp);
+        }
+
+    }
+	
+    /*
+    The function check if the user wither newly registered or existing user has verified email or not and then send the intent accordingly
+    */	
+    private boolean IsEmailVerified() {
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            return user.isEmailVerified();   // check if user is verified or not
+        }
+        else
+            return false;
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater =getMenuInflater();
