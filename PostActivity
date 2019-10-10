@@ -1,0 +1,259 @@
+package com.wizard.androidclubproject;
+
+//It is the activity in which I've implemented 2 types of intents...
+/*
+* 1. (Made for only testing purpose)First intent in which complaint can be posted with particular parameters....
+* 
+* ***2. The main implementation in which...
+*               ->firstly i am fetching all the data related to parameter selected by user in bottomNavigationView(i'm treating that
+*                   as optionMenu)
+*               ->secondly the sorting performed according to the filter selected(in optionMenu).
+* */
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Locale;
+
+public class PostsActivity extends AppCompatActivity {
+    LinearLayout postTemplate;
+    Button postIt;
+    ProgressBar pbPost;
+    DatabaseReference databaseReference;
+    EditText title,description;
+    RecyclerView postRecyclerView;
+    TextView upvotes,views;
+
+    PostsAdapter postsAdapter;
+    ArrayList<PostObjectClass>postObjectLists;
+
+    String intentCheck="";
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_post_problem_actitvity);
+
+        postTemplate = findViewById(R.id.postTemplate);
+        postRecyclerView = findViewById(R.id.postsRecyclerView);
+        postIt = findViewById(R.id.postIt);
+        pbPost = findViewById(R.id.pbPost);
+        title = findViewById(R.id.postTitle);
+        upvotes = findViewById(R.id.upvotedPosted);
+        views = findViewById(R.id.viewedPosts);
+        description = findViewById(R.id.postDescription);
+        postObjectLists=new ArrayList<>();
+
+        if (getIntent().hasExtra("PostIt")) {
+            intentCheck="PostIt";
+            postRecyclerView.setVisibility(View.GONE);
+            postTemplate.setVisibility(View.VISIBLE);
+            pbPost.setVisibility(View.INVISIBLE);
+            postIt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pbPost.setVisibility(View.VISIBLE);
+                    //for testing purpose....only class...
+                    uploadPost("class");
+                    finish();
+                }
+            });
+        }
+        
+        //*****the main code started from here.....*****------->>>>>
+        else {
+            intentCheck="AllPosts";
+            postTemplate.setVisibility(View.GONE);
+            pbPost.setVisibility(View.GONE);
+            postRecyclerView.setVisibility(View.VISIBLE);
+            postRecyclerView.setLayoutManager(new LinearLayoutManager(PostsActivity.this));
+            postRecyclerView.hasFixedSize();
+            
+            //for having the selected type of complaints/posts... 
+            if (getIntent().hasExtra("classPost")){
+                listOutProblems("Class");
+            }
+            else if (getIntent().hasExtra("publicPost")){
+                listOutProblems("Public");
+            }
+            else if (getIntent().hasExtra("solvedPost")){
+                listOutProblems("Solved");
+            }
+            else if (getIntent().hasExtra("respondedPost")){
+                listOutProblems("Responded");
+            }
+        }
+
+    }
+
+    /*Getting the total list of data related to the postType.....
+    * 
+    * */
+    private void listOutProblems(String postType) {
+        databaseReference=FirebaseDatabase.getInstance().getReference("Root").child("APP").child("Users").child("Posts").child(postType);
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                postObjectLists.clear();
+                
+        //****here i'm getting all the data...accordingly loop can be changed for 10 or fixed no. of complaints to fetch.....
+                for (DataSnapshot dataSnapshot1:dataSnapshot.getChildren()){
+                    postObjectLists.add(dataSnapshot1.getValue(PostObjectClass.class));
+                    Toast.makeText(PostsActivity.this,dataSnapshot1.getValue().toString(),Toast.LENGTH_SHORT).show();
+                }
+                postsAdapter=new PostsAdapter(PostsActivity.this,postObjectLists);
+                postRecyclerView.setAdapter(postsAdapter);
+                //Toast.makeText(PostsActivity.this,"Adapter Set",Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(PostsActivity.this,databaseError.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    
+    //function that able to upload a complaint of postType....
+    private void uploadPost(String postType) {
+        if (!title.getText().toString().isEmpty() && !description.getText().toString().isEmpty()){
+            databaseReference= FirebaseDatabase.getInstance().getReference("Root").child("APP").child("Users").child("Posts").child(postType);
+            final String pid=databaseReference.push().getKey();
+            /*Calendar calendar=Calendar.getInstance();
+            String currentDate= DateFormat.getDateInstance(DateFormat.FULL).format(calendar.getTime());*/
+            String currentDate=new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+            PostObjectClass postObject=new PostObjectClass(title.getText().toString(),description.getText().toString()
+                    ,currentDate,"10","10","on the way","severe","class");
+            if (pid != null) {
+                databaseReference.child(pid).setValue(postObject).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        pbPost.setVisibility(View.VISIBLE);
+                        if (task.isSuccessful()){
+                            Toast.makeText(PostsActivity.this,"Problem Posted",Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }
+                });
+            }
+            else {
+                pbPost.setVisibility(View.INVISIBLE);
+                Toast.makeText(PostsActivity.this,"Can't get the specified database path...",Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+        else {
+            pbPost.setVisibility(View.INVISIBLE);
+            Toast.makeText(PostsActivity.this,"please fill all the fields for post a problem",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater=getMenuInflater();
+        menuInflater.inflate(R.menu.filter_menu_post_act,menu);
+        return true;
+    }
+
+
+//option menu for filtering complaints/posts.....
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if(intentCheck.equals("AllPosts")){
+            switch (item.getItemId()){
+                case R.id.byDate:
+                    sortByDate();
+                    break;
+                case R.id.byUpvote:
+                    sortByUpvote();
+                    break;
+                case R.id.byViews:
+                    sortByViews();
+                    break;
+            }
+        }
+        return true;
+    }
+
+    /*function to sort posts according to the popularity.....*/
+    private void sortByUpvote() {
+        Collections.sort(postObjectLists, new Comparator<PostObjectClass>() {
+            @Override
+            public int compare(PostObjectClass o1, PostObjectClass o2) {
+                return Integer.parseInt(o1.getUpvotes()) - Integer.parseInt(o2.getUpvotes());
+            }
+        });
+        Collections.reverse(postObjectLists);
+        postsAdapter.updatPostAdapter(postObjectLists);
+        postRecyclerView.setAdapter(postsAdapter);
+    }
+
+    /*function to sort posts according to the maximum views.....
+    * It is just sorting,
+    * not the implementation of logic of views of posts(typically like one view for one user etc....);
+    * */
+    private void sortByViews() {
+        Collections.sort(postObjectLists, new Comparator<PostObjectClass>() {
+            @Override
+            public int compare(PostObjectClass o1, PostObjectClass o2) {
+                return Integer.parseInt(o1.getViews()) - Integer.parseInt(o2.getViews());
+            }
+        });
+        Collections.reverse(postObjectLists);
+        postsAdapter.updatPostAdapter(postObjectLists);
+        postRecyclerView.setAdapter(postsAdapter);
+    }
+
+    /*function to sort posts according to the newest first.....*/
+    private void sortByDate() {
+        Collections.sort(postObjectLists,new StringDateComparator());
+        Collections.reverse(postObjectLists);
+        postsAdapter.updatPostAdapter(postObjectLists);
+        postRecyclerView.setAdapter(postsAdapter);
+    }
+
+    /*The comparator class for comparing between two SimpleDateFormat objects with specific pattern
+    it will be used when sorting required related to date formats.....
+    in future if date format changed...please notify me for it.....!!!
+    */
+    class StringDateComparator implements Comparator<PostObjectClass>
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        public int compare(PostObjectClass o1, PostObjectClass o2)
+        {
+            try {
+                return dateFormat.parse(o1.getDate()).compareTo(dateFormat.parse(o2.getDate()));
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return 0;
+            }
+        }
+    }
+}
