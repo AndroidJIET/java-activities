@@ -47,12 +47,12 @@ public class EndlessScrollWithRecyclerView extends AppCompatActivity {
                 loadMoreData();
             }
         });
-        fetchData();
+        fetchData("complaint category");
     }
 
 
-    private void fetchData() {
-        mDatabase.child("app").child("complaints").child("class")
+    private void fetchData(String category) {
+        mDatabase.child("app").child("complaints").child(category)
                 .limitToFirst(TOTAL_ITEM_ON_SINGLE_LOAD)
                 .startAt(currentPage*TOTAL_ITEM_ON_SINGLE_LOAD).orderByValue().addValueEventListener(new ValueEventListener() {
             @Override
@@ -79,7 +79,7 @@ public class EndlessScrollWithRecyclerView extends AppCompatActivity {
 
     private void loadMoreData() {
         currentPage++;
-        fetchData();
+        fetchData("complaint category");
     }
 
 }
