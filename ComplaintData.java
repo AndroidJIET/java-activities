@@ -7,13 +7,15 @@ public class ComplaintData {
     private String date;
     private String upVote;
     private String status;
+    private String complaintId;
 
-    public ComplaintData(String title, String description, String date, String upVote, String status) {
+    public ComplaintData(String title, String description, String date, String upVote, String status, String complainId) {
         this.title = title;
         this.description = description;
         this.date = date;
         this.upVote = upVote;
         this.status = status;
+        this.complaintId = complaintId;
     }
 
     String getTitle() {
@@ -35,7 +37,9 @@ public class ComplaintData {
     String getStatus() {
         return status;
     }
-
-
+    
+    String getComplainId(){
+        return complaintId;   
+    }
 
 }
