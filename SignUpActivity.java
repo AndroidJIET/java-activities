@@ -13,7 +13,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.Calendar;
 
 public class SignUpActivity extends AppCompatActivity {
-
     DatabaseReference mDatabase;
     FirebaseUser mCurrentUser;
     String mEmail;
@@ -24,6 +23,7 @@ public class SignUpActivity extends AppCompatActivity {
     String mCollege;
     String mPassword;
     String mConfirmPassword;
+    String mStudentId;
 
     private EditText EmailEditText;
     private EditText NameEditText;
@@ -35,17 +35,13 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText PasswordEditText;
     private EditText ConfirmPasswordEditText;
     private Button SubmitButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-
         init();
-
         //Dummy inputs for testing purpose
         // mEmail = "manoj.17jccs047@jietjodhpur.ac.in";
-
         SubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,10 +69,7 @@ public class SignUpActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
-
-
     private void init() {
         mDatabase = FirebaseDatabase.getInstance().getReference(/*Get Reference according to database*/);
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -88,15 +81,11 @@ public class SignUpActivity extends AppCompatActivity {
         RegNumberEditText = findViewById(R.id.RegNumberEditText);
         SubmitButton = findViewById(R.id.SubmitButton);
     }
-
     private void studentRegistration(String mEmail) {
-
         String[] arrOfStr = mEmail.split("\\.", 2);
-
         //arrOfStr[0] will return "manoj"
         mName = arrOfStr[0];
         NameEditText.setText("Name : " + mName.toUpperCase());
-
         //arrOfStr[1] will return "17jccs047@jietjodhpur.ac.in"
         //arrOfStr[1].substring(0,2) will return 17
         int mAdmissionYear = Integer.parseInt(arrOfStr[1].substring(0, 2));
@@ -104,19 +93,23 @@ public class SignUpActivity extends AppCompatActivity {
         int mCurrentYear = (Calendar.getInstance().get(Calendar.YEAR) - (mAdmissionYear + 2000)) + 1;
         mYear = "" + mCurrentYear;
         YearEditText.setText("Year : " + mYear);
-
         mDepartmant = arrOfStr[1].substring(4, 6);//arrOfStr[1].substring(4,6) will return branch e.g. cs
         DepartmantEditText.setText("Branch : " + mDepartmant.toUpperCase());
 
-
         mCollege = arrOfStr[1].substring(2, 4);
         //arrOfStr[1].substring(2,4) will return college i.e. jc and jt
+
+        mRegDigit = arrOfStr[1].substring(6, 9);
+        // mRegDigit stores the last digit of registration number
+
         if (mCollege.equals("jc")) {
             CollegeEditText.setText("College : JIET-COE");
             mRegNumber = "COE/" + mDepartmant.toUpperCase() + "/" + mAdmissionYear + "/" + arrOfStr[1].substring(6, 9);
+            mRegNumber = "COE/" + mDepartmant.toUpperCase() + "/" + mAdmissionYear + "/" + mRegDigit;
             RegNumberEditText.setText("Reg. No.: " + mRegNumber);
         } else {
             mRegNumber = "COED/" + mDepartmant.toUpperCase() + "/" + mAdmissionYear + "/" + arrOfStr[1].substring(6, 9);
+            mRegNumber = "COED/" + mDepartmant.toUpperCase() + "/" + mAdmissionYear + "/" + mRegDigit;
             CollegeEditText.setText("College : JIET");
             RegNumberEditText.setText("Reg. No.: " + mRegNumber);
         }
@@ -124,6 +117,22 @@ public class SignUpActivity extends AppCompatActivity {
         //TODO create studentPOJOClass having fields mName,mYear,mDepartmant,mCollege,mRegNumber;
         // String userUid = mCurrentUser.getUid();
         //TODO mDatabase.child("students").child(userUid).setValue(studentPOJOClass.class);
+        /* Functional call to genetrate id of student based upon constraits provided
+           Parameter Description
+           @param : mAdmission year stores the student admission year in two digit
+           @param : mCollege stores the college in which student is enrolled in 
+           @param : mDeaprtment stores the department of college 
+           @param : mRegDigit stores the student id number of three digit
+          */
+        mStudentId = generateId(mAdmissionYear,mCollege,mDepartment,mRegDigit);
+
+        /*
+         TODO create studentPOJOClass having fields mName,mYear,mDepartmant,mCollege,mRegNumber,studentId;
+         String userUid = mCurrentUser.getUid();
+         TODO mDatabase.child("students").child(userUid).setValue(studentPOJOClass.class);
+         Store Student id into database under tag "studentid" stored in string StudentId 
+        */
+
         startActivity(new Intent(SignUpActivity.this,VerifyEmailPopUp.class));
     }
 
@@ -133,5 +142,11 @@ public class SignUpActivity extends AppCompatActivity {
     private boolean isValidEmail(String email) {
         String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
         return email.matches(regex);
+    }
+
+    public String generateId(String mAdmissionYear,String mCollege,String mDepartment,String mRegDigit){
+     /*
+      Merge function here
+     */
     }
 }
