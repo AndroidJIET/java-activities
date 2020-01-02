@@ -12,9 +12,13 @@ public class Search {
     }
 
     public Search() {
+        
+        //Ambiguous search defination, either a constructor or a function to return search
+        
+       
     }
 
-
+     // performing a search over a database and returning a array list consisiting details of the problem.
 
     public String getDescription() {
         return Description;
