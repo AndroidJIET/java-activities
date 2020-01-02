@@ -42,6 +42,10 @@ public class SplashScreen extends AppCompatActivity {
             public void run() {
                 mCurrentuser = mAuth.getCurrentUser();
                 if (mCurrentuser == null) {
+                    
+                    /*
+                      Add logo animation to existing splash screen
+                    */
                     sendToStart();
                 } else {
                     Intent sendtomainpage = new Intent(SplashScreen.this, MainPage.class);
