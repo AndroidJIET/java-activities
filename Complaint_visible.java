@@ -17,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class Complaint_visible extends AppCompatActivity {
 
     public static final int REST_TIME=10;
+    // irrelevant use of REST TIME
     EditText mComplaintText;
     private ChildEventListener mChildEventListener;
     private FirebaseDatabase mfirebaseDatabase;
@@ -31,8 +32,9 @@ public class Complaint_visible extends AppCompatActivity {
         mDatabaseReference=mfirebaseDatabase.getReference().child("app").child("users").child("auth").child("post").child("authority").child("vcomplaint").child("complaintId");
 
         if(REST_TIME>10){
-            setComplaintVisibility("","");
+            setComplaintVisibility("",""); // Have to do over firebase
 
+             /* Just accessing the firebase need to be read write */
             mChildEventListener=new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -66,7 +68,7 @@ public class Complaint_visible extends AppCompatActivity {
     public boolean setComplaintVisibility(String complaintID,String authority){
 
             if (authority == null) {
-                mComplaintText.setVisibility(View.VISIBLE);
+                mComplaintText.setVisibility(View.VISIBLE);  // setVisibility? why on views has to over firebase 
                 Authority authority1 = new Authority(complaintID);
                 mDatabaseReference.push().setValue(authority1);
             } else {
