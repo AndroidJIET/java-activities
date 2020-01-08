@@ -35,8 +35,6 @@ public class MainActivity extends AppCompatActivity {
     private SolvedFragment msolvedFragment;
 
     private EditText mStudentId;
-    private Button mAddAsCR;
-    private Button mDeleteCr;
     private DatabaseReference mRootRef;
     FireApp mFireApp;
 
