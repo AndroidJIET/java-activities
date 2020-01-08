@@ -125,12 +125,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-        mDeleteCr.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                deleteCR(mStudentId);
-            }
-        });
 
     private void setFragment(Fragment fragment)
     {
