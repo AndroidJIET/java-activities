@@ -3,6 +3,7 @@ package com.jiet.androidclub;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,7 +15,8 @@ import com.google.firebase.database.ValueEventListener;
 
 //This Activity will show details of complaint
 public class ComplaintDetailsActivity extends AppCompatActivity {
-    private TextView mTitle,mDate,mDescription,mNoOfUpvotes,mStatus;
+    private TextView mTitle,mDate,mDescription,mStatus;
+    private Button mNoOfUpvotes;
     private ImageView mUpVoteIcon;
     private DatabaseReference mDatabase;
     @Override
