@@ -32,6 +32,7 @@
                mComplaintMap.put("section",dataSnapshot.child("section").toString());
                mComplaintMap.put("year",dataSnapshot.child("year").toString());
                mComplaintMap.put("department",dataSnapshot.child("department").toString());
+               mComplaintmap.put("lastvisible","0");  //to see the active state of complaint
 
              
               mRootDatabase.child("complaints").child(Category).setValue(mComplaintMap).addOnCompleteListener(new OnCompleteListener<Void>() {
